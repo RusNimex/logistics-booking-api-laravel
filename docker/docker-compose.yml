@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ./php
+    volumes:
+      - ..:/var/www/html
+    working_dir: /var/www/html
+    ports:
+      - "8000:8000"
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      PHP_IDE_CONFIG: "serverName=logistics"
+      XDEBUG_MODE: "debug,develop"
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003"
+
+  mysql:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: logistics
+      MYSQL_USER: logistics
+      MYSQL_PASSWORD: logistics
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
