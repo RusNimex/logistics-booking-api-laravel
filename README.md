@@ -28,33 +28,33 @@
 
 ```mermaid
 flowchart TD
-    A[Запрос] --> B[cache.get(key)]
-    B -->|HIT| C[Вернуть кеш]
-    B -->|MISS| D[Попытка lock(key)]
-    D -->|lock OK| E[double-check cache]
-    E -->|HIT| C
-    E -->|MISS| F[read DB]
-    F --> G[cache.put]
-    G --> H[Вернуть]
-    D -->|lock FAIL / timeout| I[cache.get(key)]
-    I -->|HIT| C
-    I -->|MISS| J[Вернуть пусто/стейл]
+    A[Запрос] --> B["cache.get(key)"];
+    B -->|HIT| C[Вернуть кеш];
+    B -->|MISS| D["Попытка lock(key)"];
+    D -->|lock OK| E["double-check cache"];
+    E -->|HIT| C;
+    E -->|MISS| F["read DB"];
+    F --> G["cache.put"];
+    G --> H[Вернуть];
+    D -->|lock FAIL timeout| I["cache.get(key)"];
+    I -->|HIT| C;
+    I -->|MISS| J[Вернуть пусто/стейл];
 ```
 
 ## Схема защиты от oversale в SlotHolderService
 
 ```mermaid
 flowchart TD
-    A[create(slotId, idempotencyKey)] --> B[Cache.get(idempotencyKey)]
-    B -->|Hold найден| C[Вернуть Hold]
-    B -->|Есть hold_id| D[Hold::find(hold_id)]
-    D -->|Найден| C
-    D -->|Не найден| E[slotRepository.get(slotId)]
-    B -->|Кеш пуст| E
-    E -->|Не найден| F[SlotsExceptions::notFound]
-    E -->|Найден| G[Проверка capacity]
-    G -->|Превышение| H[SlotsExceptions::conflict]
-    G -->|Ок| I[holdRepository.create(slotId)]
-    I --> J[Cache.put(idempotencyKey, hold)]
-    J --> C
+    A["create(slotId, idempotencyKey)"] --> B["Cache.get(idempotencyKey)"];
+    B -->|Hold найден| C[Вернуть Hold];
+    B -->|Есть hold_id| D["Hold::find(hold_id)"];
+    D -->|Найден| C;
+    D -->|Не найден| E["slotRepository.get(slotId)"];
+    B -->|Кеш пуст| E;
+    E -->|Не найден| F["SlotsExceptions::notFound"];
+    E -->|Найден| G[Проверка capacity];
+    G -->|Превышение| H["SlotsExceptions::conflict"];
+    G -->|Ок| I["holdRepository.create(slotId)"];
+    I --> J["Cache.put(idempotencyKey, hold)"];
+    J --> C;
 ```
