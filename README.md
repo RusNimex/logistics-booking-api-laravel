@@ -16,6 +16,29 @@
 
 - Пользователь приложения: `logist` / `logist_pass`
 
+## Примеры запросов (curl)
+
+Получить доступные слоты:
+```
+curl -X GET "http://localhost:8000/api/slots/availability"
+```
+
+Создать hold для слота (обязателен заголовок `Idempotency-Key` в формате UUID):
+```
+curl -X POST "http://localhost:8000/api/slots/1/hold" \
+  -H "Idempotency-Key: 11111111-1111-1111-1111-111111111111"
+```
+
+Подтвердить hold:
+```
+curl -X POST "http://localhost:8000/api/holds/1/confirm"
+```
+
+Отменить hold:
+```
+curl -X DELETE "http://localhost:8000/api/holds/1"
+```
+
 ## Миграции и сиды
 
 Запуск миграций:

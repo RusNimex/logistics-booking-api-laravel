@@ -7,24 +7,20 @@ use App\Contracts\SlotCapacityRepositoryInterface;
 use App\Enums\HoldStatus;
 use App\Exceptions\SlotsExceptions;
 use App\Models\Hold;
+use App\Services\SlotHolderService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Создание записи в таблице holds
  */
-class HoldCreateRepository implements HoldCreateRepositoryInterface
+readonly class HoldCreateRepository implements HoldCreateRepositoryInterface
 {
     /**
-     * Время жизни холда в минутах
-     */
-    private const int HOLD_TTL_MINUTES = 5;
-
-    /**
-     * @param SlotCapacityRepositoryInterface $holdActive - получения активных холдов
+     * @param SlotCapacityRepositoryInterface $holdActive получения активных холдов
      */
     public function __construct(
-        private readonly SlotCapacityRepositoryInterface $holdActive
+        private SlotCapacityRepositoryInterface $holdActive
     ) {}
 
     /**
@@ -50,21 +46,12 @@ class HoldCreateRepository implements HoldCreateRepositoryInterface
                 throw SlotsExceptions::conflict();
             }
 
-            // Просроченные слоты не обнуляются, уберем эту проблему
-            if ($slot->remaining > $slot->capacity) {
-                throw SlotsExceptions::oversale($slotId);
-            }
-
-            $expiresAt = $now->copy()->addMinutes(self::HOLD_TTL_MINUTES);
+            $expiresAt = $now->copy()->addMinutes(SlotHolderService::HOLD_TTL_MINUTES);
             $holdId = DB::table('holds')->insertGetId([
                 'slots_id' => $slotId,
                 'status' => HoldStatus::Held->value,
                 'expires_at' => $expiresAt,
             ]);
-
-            DB::table('slots')
-                ->where('id', $slotId)
-                ->update(['remaining' => $slot->remaining + 1]);
 
             return Hold::query()->findOrFail($holdId);
         });

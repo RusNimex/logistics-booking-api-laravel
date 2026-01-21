@@ -2,17 +2,19 @@
 
 namespace App\Providers;
 
+use App\Contracts\HoldStateRepositoryInterface;
+use App\Contracts\HoldStateServiceInterface;
 use App\Contracts\SlotServiceCollectorInterface;
 use App\Contracts\SlotRepositoryInterface;
 use App\Contracts\SlotHolderServiceInterface;
-use App\Contracts\HoldActiveRepositoryInterface;
 use App\Contracts\HoldCreateRepositoryInterface;
 use App\Contracts\SlotCapacityRepositoryInterface;
 use App\Repository\CachedSlotRepository;
 use App\Repository\DbSlotRepository;
-use App\Repository\HoldActiveRepository;
 use App\Repository\HoldCreateRepository;
+use App\Repository\HoldStateRepository;
 use App\Repository\SlotCapacityRepository;
+use App\Services\HoldStateService;
 use App\Services\SlotHolderService;
 use App\Services\SlotServiceCollector;
 use Illuminate\Support\ServiceProvider;
@@ -30,15 +32,15 @@ class AppServiceProvider extends ServiceProvider
             return new CachedSlotRepository($dbRepo);
         });
 
-        // Сервис слотов
+        // Классы слотов
         $this->app->bind(SlotServiceCollectorInterface::class, SlotServiceCollector::class);
-
-        // Репозитории для холдов
-        $this->app->bind(SlotCapacityRepositoryInterface::class, SlotCapacityRepository::class);
-        $this->app->bind(HoldCreateRepositoryInterface::class, HoldCreateRepository::class);
-
-        // Сервис создания холдов
         $this->app->bind(SlotHolderServiceInterface::class, SlotHolderService::class);
+        $this->app->bind(SlotCapacityRepositoryInterface::class, SlotCapacityRepository::class);
+
+        // Классы холдов
+        $this->app->bind(HoldCreateRepositoryInterface::class, HoldCreateRepository::class);
+        $this->app->bind(HoldStateRepositoryInterface::class, HoldStateRepository::class);
+        $this->app->bind(HoldStateServiceInterface::class, HoldStateService::class);
     }
 
     /**
