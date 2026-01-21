@@ -11,8 +11,8 @@ return new class extends Migration
     {
         Schema::create('slots', function (Blueprint $table) {
             $table->id();
-            $table->integer('capacity');
-            $table->integer('remaining');
+            $table->unsignedInteger('capacity');
+            $table->unsignedInteger('remaining');
         });
 
         Schema::create('holds', function (Blueprint $table) {

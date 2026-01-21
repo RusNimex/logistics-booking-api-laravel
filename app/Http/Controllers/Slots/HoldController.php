@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Slots;
 
+use App\Contracts\HoldStateServiceInterface;
 use App\Contracts\SlotHolderServiceInterface;
 use App\Exceptions\SlotsExceptions;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HoldPayloadResource;
+use App\Services\HoldStateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,10 +17,12 @@ use Illuminate\Http\Request;
 class HoldController extends Controller
 {
     /**
-     * @param SlotHolderServiceInterface $service - сервисный слой (кэш, транзакции, идемпотентность)
+     * @param SlotHolderServiceInterface $slotService - сервисный слой (кэш, транзакции, идемпотентность)
+     * @param HoldStateServiceInterface $stateService - меняем состояние холда (StateMachine) {@see HoldStateService}
      */
     public function __construct(
-        private readonly SlotHolderServiceInterface $service
+        private readonly SlotHolderServiceInterface $slotService,
+        private readonly HoldStateServiceInterface  $stateService,
     ) {}
 
     /**
@@ -35,28 +39,37 @@ class HoldController extends Controller
     public function create(Request $request, int $id): JsonResponse
     {
         $idempotencyKey = (string) $request->attributes->get('idempotency_key');
-        $payload = $this->service->create($id, $idempotencyKey);
+        $payload = $this->slotService->create($id, $idempotencyKey);
 
         return HoldPayloadResource::make($payload)->response();
     }
 
     /**
-     * Подтверждение холда в слоте
+     * Подтверждение холда в слоте.
      *
-     * Метод: POST /slots/{id}/confirm
+     * Метод: POST /holds/{id}/confirm
+     *
+     * Переводит холд в состояние confirmed.
+     * Атомарно уменьшает remaining в слоте на 1 с защитой от оверсела.
+     * При отсутствии мест возвращает 409 Conflict.
+     * После успешного подтверждения инвалидирует кеш доступности.
      */
-    public function confirm(int $id): JsonResponse
+    public function confirm(int $id): bool
     {
-        //
+        return $this->stateService->confirm($id);
     }
 
     /**
      * Отмена холда в слоте
      *
-     * Метод: POST /slots/{id}/canceled
+     * Метод: DELETE /holds/{id}
+     *
+     * Меняет состояние холда на cancelled.
+     * Возвращает слот в доступ, обновляя остаток.
+     * Инвалидирует кеш доступных слотов.
      */
-    public function canceled(int $id): JsonResponse
+    public function cancel(int $id): bool
     {
-        //
+        return $this->stateService->cancel($id);
     }
 }

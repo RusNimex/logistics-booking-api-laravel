@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
 class Hold extends Model
 {
     protected $table = 'holds';
+    public $timestamps = false;
 
     protected $fillable = [
         'slots_id',

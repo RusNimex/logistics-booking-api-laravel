@@ -10,15 +10,28 @@ use App\Models\Hold;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Сервис для создания холда в слоте с поддержкой идемпотентности в запросах.
+ */
 readonly class SlotHolderService implements SlotHolderServiceInterface
 {
     /**
-     * @param SlotCapacityRepositoryInterface $slot - данных о слоте
-     * @param HoldCreateRepositoryInterface $hold - создания холда
+     * Время жизни холда в минутах
+     */
+    const int HOLD_TTL_MINUTES = 5;
+
+    /**
+     * Время жизни кеша в минутах
+     */
+    const int CACHE_TTL_MINUTES = 5;
+
+    /**
+     * @param SlotCapacityRepositoryInterface $slot данные о слоте
+     * @param HoldCreateRepositoryInterface $hold создание холда
      */
     public function __construct(
         private SlotCapacityRepositoryInterface $slot,
-        private HoldCreateRepositoryInterface   $hold
+        private HoldCreateRepositoryInterface   $hold,
     ) {}
 
     /**
@@ -55,7 +68,7 @@ readonly class SlotHolderService implements SlotHolderServiceInterface
 
         $hold = $this->hold->create($slotId);
 
-        Cache::put($cacheKey, $hold, Carbon::now()->addMinutes(self::IDEMPOTENCY_TTL_MINUTES));
+        Cache::put($cacheKey, $hold, Carbon::now()->addMinutes(self::CACHE_TTL_MINUTES));
 
         return $hold;
     }

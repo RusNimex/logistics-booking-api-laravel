@@ -12,11 +12,6 @@ use App\Models\Hold;
 interface SlotHolderServiceInterface
 {
     /**
-     * Время жизни кеша для идемпотентности.
-     */
-    const int IDEMPOTENCY_TTL_MINUTES = 5;
-
-    /**
      * Создаем холд на N минут и поддерживаем идемпотентность.
      *
      * @param int $slotId
