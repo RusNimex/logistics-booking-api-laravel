@@ -11,8 +11,8 @@ class SlotsSeeder extends Seeder
     {
         $rows = [];
 
-        for ($i = 0; $i < 100; $i++) {
-            $capacity = random_int(1, 100);
+        for ($i = 0; $i < 10; $i++) {
+            $capacity = random_int(1, 20);
             $rows[] = [
                 'capacity' => $capacity,
                 'remaining' => random_int(0, $capacity),

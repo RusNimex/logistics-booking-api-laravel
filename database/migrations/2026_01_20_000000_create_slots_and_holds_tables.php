@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\HoldStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +18,8 @@ return new class extends Migration
         Schema::create('holds', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('slots_id');
-            $table->enum('status', ['held', 'confirmed', 'canceled']);
+            $table->enum('status', HoldStatus::values());
+            $table->timestamp('expires_at')->nullable()->index();
 
             $table->foreign('slots_id')
                 ->references('id')
