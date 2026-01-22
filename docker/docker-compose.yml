@@ -35,3 +35,19 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  k6:
+    image: grafana/k6:latest
+    depends_on:
+      - app
+    volumes:
+      - ./k6:/scripts:ro
+    environment:
+      BASE_URL: http://app:8000/api
+      SLOT_COUNT: 10
+      VUS: 100
+      DURATION: 15m
+      IDEMPOTENCY_RATE: 5
+      IDEMPOTENCY_SLOT: 1
+      IDEMPOTENCY_KEY: 11111111-1111-1111-1111-111111111111
+    command: ["run", "/scripts/fill-slots.js"]
