@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "logistics-booking-api-laravel",
+    "name": "logistics-booking/logistics-booking-api-laravel",
     "type": "project",
     "description": "Бронирование мест в слотах для перевозок охлажденных грузов",
     "keywords": ["laravel", "logistics", "booking", "api"],
