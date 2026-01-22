@@ -38,10 +38,8 @@ class HoldStateRepository implements HoldStateRepositoryInterface
             $this->updateSlotRemaining($slot->id, $slot->remaining - 1);
 
             $hold->status = HoldStatus::Confirmed;
-            $hold->save();
-            $hold->fresh();
 
-            return true;
+            return $hold->save();
         });
     }
 
@@ -61,9 +59,8 @@ class HoldStateRepository implements HoldStateRepositoryInterface
             $this->updateSlotRemaining($slot->id, $slot->remaining + 1);
 
             $hold->status = HoldStatus::Canceled;
-            $hold->save();
 
-            return true;
+            return $hold->save();
         });
     }
 
