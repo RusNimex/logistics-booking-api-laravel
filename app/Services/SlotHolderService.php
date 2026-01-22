@@ -48,14 +48,6 @@ readonly class SlotHolderService implements SlotHolderServiceInterface
             return $cached;
         }
 
-        if (is_array($cached) && isset($cached['hold_id'])) {
-            $hold = Hold::query()->find($cached['hold_id']);
-
-            if ($hold instanceof Hold) {
-                return $hold;
-            }
-        }
-
         $slot = $this->slot->get($slotId);
 
         if ($slot === null) {

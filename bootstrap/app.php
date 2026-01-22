@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontReport([
+            \App\Exceptions\SlotsExceptions::class,
+        ]);
+
         $exceptions->render(function (\App\Exceptions\SlotsExceptions $e, $request) {
             return response()->json([
                 'message' => $e->getMessage(),

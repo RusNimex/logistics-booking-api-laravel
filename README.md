@@ -39,6 +39,29 @@ curl -X POST "http://localhost:8000/api/holds/1/confirm"
 curl -X DELETE "http://localhost:8000/api/holds/1"
 ```
 
+## Тестирование блокировок и заполнения слотов (k6)
+
+Сценарий `docker/k6/fill-slots.js` запускает конкурентные запросы на создание
+hold и после успешного создания подтверждает hold (confirm), чтобы уменьшать
+`remaining`. Тест останавливается, когда суммарный `remaining` по всем слотам
+становится 0. Также выполняется мягкий сценарий идемпотентности с повторяющимся
+ключом.
+
+Запуск k6 контейнера:
+`docker compose -f docker/docker-compose.yml up k6`
+
+Если приложение уже запущено:
+`docker compose -f docker/docker-compose.yml run --rm k6`
+
+Параметры запуска (env):
+- `BASE_URL` (по умолчанию `http://app:8000/api`)
+- `SLOT_COUNT` (по умолчанию `500`)
+- `VUS` ((Virtual Users) по умолчанию `100`)
+- `DURATION` (по умолчанию `15m`)
+- `IDEMPOTENCY_RATE` (по умолчанию `5`)
+- `IDEMPOTENCY_SLOT` (по умолчанию `1`)
+- `IDEMPOTENCY_KEY` (по умолчанию `11111111-1111-1111-1111-111111111111`)
+
 ## Миграции и сиды
 
 Запуск миграций:
@@ -64,7 +87,7 @@ flowchart TD
     I -->|MISS| J[Вернуть пусто/стейл];
 ```
 
-## Схема защиты от oversale в SlotHolderService
+## Схема защиты от oversale
 
 ```mermaid
 flowchart TD
